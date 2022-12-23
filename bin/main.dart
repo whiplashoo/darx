@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:darx/scanner.dart';
+import 'package:darx/token.dart';
+
 void main(List<String> args) {
-  Runner.init(args);
+  Runner().init(args);
 }
 
 class Runner {
-  static bool hadError = false;
+  bool hadError = false;
 
-  static void init(args) {
+  void init(args) {
     if (args.length > 1) {
       print("Usage: darx [script]");
       exit(64);
@@ -18,33 +21,41 @@ class Runner {
     }
   }
 
-  static void runFile(String path) {
+  void runFile(String path) {
     try {
       File(path).readAsString().then((String contents) {
-        print(contents);
+        run(contents);
       });
     } catch (e) {
       print(e);
     }
   }
 
-  static void runPrompt() {
+  void runPrompt() {
     print("Welcome to Darx!");
     while (true) {
       print("> ");
       String? line = stdin.readLineSync();
       if (line == null) break;
-      print(line);
+      run(line);
     }
   }
 
-  run() {}
+  void run(String source) {
+    Scanner scanner = Scanner(source);
+    List<Token> tokens = scanner.scanTokens();
 
-  static void error(int line, String message) {
+    // For now, just print the tokens.
+    for (Token token in tokens) {
+      print(token);
+    }
+  }
+
+  void error(int line, String message) {
     report(line, "", message);
   }
 
-  static void report(int line, String where, String message) {
+  void report(int line, String where, String message) {
     print("[line $line] Error$where: $message");
     hadError = true;
   }

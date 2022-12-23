@@ -179,12 +179,12 @@ class Scanner {
   }
 
   String peek() {
-    if (isAtEnd()) return '0';
+    if (isAtEnd()) return '\x00';
     return source[current];
   }
 
   String peekNext() {
-    if (current + 1 >= source.length) return '0';
+    if (current + 1 >= source.length) return '\x00';
     return source[current + 1];
   }
 
@@ -193,7 +193,8 @@ class Scanner {
   }
 
   String advance() {
-    return source[current++];
+    current++;
+    return source[current - 1];
   }
 
   bool match(String expected) {
@@ -209,6 +210,7 @@ class Scanner {
   }
 
   bool isDigit(String c) {
+    print(c);
     return c.codeUnitAt(0) >= '0'.codeUnitAt(0) &&
         c.codeUnitAt(0) <= '9'.codeUnitAt(0);
   }
