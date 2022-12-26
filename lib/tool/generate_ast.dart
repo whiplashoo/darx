@@ -21,7 +21,10 @@ void defineAst(String outputDir, String baseName, List<String> types) {
 
   sink.write("import 'token.dart';\n");
   sink.write("abstract class $baseName {\n");
+  sink.write("  T accept<T>(Visitor<T> visitor);\n");
   sink.write("}\n");
+
+  defineVisitor(sink, baseName, types);
 
   for (String type in types) {
     String className = type.split(":")[0].trim();
@@ -42,6 +45,13 @@ void defineType(
   }).join(", ");
   sink.write("    $className($thisFields);\n");
 
+  // Visitor pattern.
+  sink.write("\n");
+  sink.write("  @override\n");
+  sink.write(
+      "  T accept<T>(Visitor<T> visitor) => visitor.visit$className$baseName(this);\n");
+  sink.write("\n");
+
   // Fields.
   List<String> fields = fieldList.split(", ");
   for (String field in fields) {
@@ -49,4 +59,14 @@ void defineType(
   }
 
   sink.write("  }\n");
+}
+
+void defineVisitor(IOSink sink, String baseName, List<String> types) {
+  sink.write("abstract class Visitor<T> {\n");
+  for (String type in types) {
+    String typeName = type.split(":")[0].trim();
+    sink.write(
+        "  T visit$typeName$baseName($typeName ${baseName.toLowerCase()});\n");
+  }
+  sink.write("}\n");
 }
