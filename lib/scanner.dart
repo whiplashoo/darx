@@ -210,7 +210,6 @@ class Scanner {
   }
 
   bool isDigit(String c) {
-    print(c);
     return c.codeUnitAt(0) >= '0'.codeUnitAt(0) &&
         c.codeUnitAt(0) <= '9'.codeUnitAt(0);
   }
