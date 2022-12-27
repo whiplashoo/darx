@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:darx/ast_printer.dart';
+import 'package:darx/expr.dart';
+import 'package:darx/parser.dart';
 import 'package:darx/scanner.dart';
 import 'package:darx/token.dart';
 
@@ -44,7 +47,11 @@ class Runner {
   void run(String source) {
     Scanner scanner = Scanner(source);
     List<Token> tokens = scanner.scanTokens();
+    Parser parser = Parser(tokens);
+    Expr? expression = parser.parse();
 
+    if (hadError) return;
+    print(AstPrinter().print(expression!));
     // For now, just print the tokens.
     for (Token token in tokens) {
       print(token);
