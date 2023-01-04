@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:darx/ast_printer.dart';
 import 'package:darx/expr.dart';
+import 'package:darx/interpreter.dart';
 import 'package:darx/parser.dart';
+import 'package:darx/runtime_error.dart';
 import 'package:darx/scanner.dart';
 import 'package:darx/token.dart';
 
@@ -12,6 +13,8 @@ void main(List<String> args) {
 
 class Runner {
   bool hadError = false;
+  bool hadRuntimeError = false;
+  Interpreter interpreter = Interpreter();
 
   void init(args) {
     if (args.length > 1) {
@@ -50,16 +53,19 @@ class Runner {
     Parser parser = Parser(tokens);
     Expr? expression = parser.parse();
 
-    if (hadError) return;
-    print(AstPrinter().print(expression!));
+    if (hadError) exit(65);
+    interpreter.interpret(expression!);
+    if (hadRuntimeError) exit(70);
+
     // For now, just print the tokens.
     for (Token token in tokens) {
       print(token);
     }
   }
 
-  void error(int line, String message) {
-    report(line, "", message);
+  void runtimeError(RuntimeError error) {
+    print("${error.message} \n at line: ${error.token.line}");
+    hadRuntimeError = true;
   }
 
   void report(int line, String where, String message) {
