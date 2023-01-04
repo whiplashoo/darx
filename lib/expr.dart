@@ -4,11 +4,11 @@ abstract class Expr {
   T accept<T>(Visitor<T> visitor);
 }
 
-abstract class Visitor<T> {
-  T visitBinaryExpr(Binary expr);
-  T visitGroupingExpr(Grouping expr);
-  T visitLiteralExpr(Literal expr);
-  T visitUnaryExpr(Unary expr);
+abstract class Visitor<R> {
+  R visitBinaryExpr(Binary expr);
+  R visitGroupingExpr(Grouping expr);
+  R visitLiteralExpr(Literal expr);
+  R visitUnaryExpr(Unary expr);
 }
 
 class Binary extends Expr {

@@ -84,7 +84,7 @@ class Parser {
     if (match([TokenType.NIL])) return Literal(null);
 
     if (match([TokenType.NUMBER, TokenType.STRING])) {
-      return Literal(previous().literal);
+      return Literal(previous().literal!);
     }
 
     if (match([TokenType.LEFT_PAREN])) {
