@@ -149,4 +149,15 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
     print(stringify(value));
     return;
   }
+
+  @override
+  void visitVarStmt(Var stmt) {
+    // TODO: implement visitVarStmt
+  }
+
+  @override
+  Object? visitVariableExpr(Variable expr) {
+    // TODO: implement visitVariableExpr
+    throw UnimplementedError();
+  }
 }

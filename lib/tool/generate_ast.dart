@@ -11,11 +11,13 @@ void main(List<String> args) {
     "Binary   : Expr left, Token operator, Expr right",
     "Grouping : Expr expression",
     "Literal  : Object? value",
+    "Variable : Token name",
     "Unary    : Token operator, Expr right"
   ]);
 
   defineAst(outputDir, "Stmt", [
     "Expression    : Expr expression",
+    "Var           : Token name, Expr? initializer",
     "Print         : Expr expression",
   ]);
 }
@@ -27,9 +29,8 @@ void defineAst(String outputDir, String baseName, List<String> types) {
 
   if (baseName == "Stmt") {
     sink.write("import 'expr.dart';\n");
-  } else {
-    sink.write("import 'token.dart';\n");
   }
+  sink.write("import 'token.dart';\n");
   sink.write("abstract class $baseName {\n");
   if (baseName == "Stmt") {
     sink.write("  void accept(StmtVisitor visitor);\n");

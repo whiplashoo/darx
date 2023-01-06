@@ -14,13 +14,23 @@ class Parser {
   List<Stmt> parse() {
     List<Stmt> statements = [];
     while (!isAtEnd()) {
-      statements.add(statement());
+      statements.add(declaration());
     }
     return statements;
   }
 
   Expr expression() {
     return equality();
+  }
+
+  Stmt declaration() {
+    try {
+      if (match([TokenType.VAR])) return varDeclaration();
+      return statement();
+    } on RuntimeError {
+      synchronize();
+      return Expression(Literal(null));
+    }
   }
 
   Stmt statement() {
@@ -32,6 +42,16 @@ class Parser {
     Expr value = expression();
     consume(TokenType.SEMICOLON, 'Expect \';\' after value.');
     return Print(value);
+  }
+
+  Stmt varDeclaration() {
+    Token name = consume(TokenType.IDENTIFIER, 'Expect variable name.');
+    Expr? initializer;
+    if (match([TokenType.EQUAL])) {
+      initializer = expression();
+    }
+    consume(TokenType.SEMICOLON, 'Expect \';\' after variable declaration.');
+    return Var(name, initializer);
   }
 
   Stmt expressionStatement() {
@@ -103,6 +123,10 @@ class Parser {
 
     if (match([TokenType.NUMBER, TokenType.STRING])) {
       return Literal(previous().literal!);
+    }
+
+    if (match([TokenType.IDENTIFIER])) {
+      return Variable(previous());
     }
 
     if (match([TokenType.LEFT_PAREN])) {

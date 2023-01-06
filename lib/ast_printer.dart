@@ -39,4 +39,10 @@ class AstPrinter implements ExprVisitor<String> {
 
     return builder.toString();
   }
+
+  @override
+  String visitVariableExpr(Variable expr) {
+    // TODO: implement visitVariableExpr
+    throw UnimplementedError();
+  }
 }
