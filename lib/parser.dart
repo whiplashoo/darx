@@ -2,6 +2,7 @@ import 'package:darx/runtime_error.dart';
 import 'package:darx/token_type.dart';
 
 import 'expr.dart';
+import 'stmt.dart';
 import 'token.dart';
 
 class Parser {
@@ -10,16 +11,33 @@ class Parser {
 
   Parser(this.tokens);
 
-  Expr? parse() {
-    try {
-      return expression();
-    } on RuntimeError {
-      return null;
+  List<Stmt> parse() {
+    List<Stmt> statements = [];
+    while (!isAtEnd()) {
+      statements.add(statement());
     }
+    return statements;
   }
 
   Expr expression() {
     return equality();
+  }
+
+  Stmt statement() {
+    if (match([TokenType.PRINT])) return printStatement();
+    return expressionStatement();
+  }
+
+  Stmt printStatement() {
+    Expr value = expression();
+    consume(TokenType.SEMICOLON, 'Expect \';\' after value.');
+    return Print(value);
+  }
+
+  Stmt expressionStatement() {
+    Expr expr = expression();
+    consume(TokenType.SEMICOLON, 'Expect \';\' after expression.');
+    return Expression(expr);
   }
 
   Expr equality() {

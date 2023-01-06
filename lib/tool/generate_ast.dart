@@ -6,11 +6,17 @@ void main(List<String> args) {
     exit(64);
   }
   String outputDir = args[0];
+
   defineAst(outputDir, "Expr", [
     "Binary   : Expr left, Token operator, Expr right",
     "Grouping : Expr expression",
     "Literal  : Object? value",
     "Unary    : Token operator, Expr right"
+  ]);
+
+  defineAst(outputDir, "Stmt", [
+    "Expression    : Expr expression",
+    "Print         : Expr expression",
   ]);
 }
 
@@ -19,9 +25,17 @@ void defineAst(String outputDir, String baseName, List<String> types) {
   File file = File(path);
   IOSink sink = file.openWrite();
 
-  sink.write("import 'token.dart';\n");
+  if (baseName == "Stmt") {
+    sink.write("import 'expr.dart';\n");
+  } else {
+    sink.write("import 'token.dart';\n");
+  }
   sink.write("abstract class $baseName {\n");
-  sink.write("  T accept<T>(Visitor<T> visitor);\n");
+  if (baseName == "Stmt") {
+    sink.write("  void accept(StmtVisitor visitor);\n");
+  } else {
+    sink.write("  T accept<T>(ExprVisitor<T> visitor);\n");
+  }
   sink.write("}\n");
 
   defineVisitor(sink, baseName, types);
@@ -48,8 +62,13 @@ void defineType(
   // Visitor pattern.
   sink.write("\n");
   sink.write("  @override\n");
-  sink.write(
-      "  T accept<T>(Visitor<T> visitor) => visitor.visit$className$baseName(this);\n");
+  if (baseName == "Stmt") {
+    sink.write(
+        "  void accept(StmtVisitor visitor) => visitor.visit$className$baseName(this);\n");
+  } else {
+    sink.write(
+        "  T accept<T>(ExprVisitor<T> visitor) => visitor.visit$className$baseName(this);\n");
+  }
   sink.write("\n");
 
   // Fields.
@@ -62,11 +81,21 @@ void defineType(
 }
 
 void defineVisitor(IOSink sink, String baseName, List<String> types) {
-  sink.write("abstract class Visitor<T> {\n");
+  if (baseName == "Stmt") {
+    sink.write("abstract class StmtVisitor {\n");
+  } else {
+    sink.write("abstract class ExprVisitor<T> {\n");
+  }
+
   for (String type in types) {
     String typeName = type.split(":")[0].trim();
-    sink.write(
-        "  T visit$typeName$baseName($typeName ${baseName.toLowerCase()});\n");
+    if (baseName == "Stmt") {
+      sink.write(
+          "  void visit$typeName$baseName($typeName ${baseName.toLowerCase()});\n");
+    } else {
+      sink.write(
+          "  T visit$typeName$baseName($typeName ${baseName.toLowerCase()});\n");
+    }
   }
   sink.write("}\n");
 }

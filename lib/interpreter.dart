@@ -1,14 +1,16 @@
 import 'package:darx/runtime_error.dart';
+import 'package:darx/stmt.dart';
 
 import 'expr.dart';
 import 'token.dart';
 import 'token_type.dart';
 
-class Interpreter implements Visitor<Object?> {
-  void interpret(Expr expr) {
+class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
+  void interpret(List<Stmt> statements) {
     try {
-      Object? value = evaluate(expr);
-      print(stringify(value));
+      for (Stmt statement in statements) {
+        execute(statement);
+      }
     } on RuntimeError catch (error) {
       print(error);
       return;
@@ -17,6 +19,10 @@ class Interpreter implements Visitor<Object?> {
 
   Object? evaluate(Expr expr) {
     return expr.accept(this);
+  }
+
+  void execute(Stmt stmt) {
+    stmt.accept(this);
   }
 
   @override
@@ -29,7 +35,10 @@ class Interpreter implements Visitor<Object?> {
         return (left as num) - (right as num);
       case TokenType.SLASH:
         checkNumberOperands(expr.operator, left, right);
-        return (left as num) / (right as num);
+        if ((right as num) == 0) {
+          throw RuntimeError(expr.operator, 'Division by zero.');
+        }
+        return (left as num) / right;
       case TokenType.STAR:
         checkNumberOperands(expr.operator, left, right);
         return (left as num) * (right as num);
@@ -39,6 +48,12 @@ class Interpreter implements Visitor<Object?> {
         }
         if (left is String && right is String) {
           return left + right;
+        }
+        if (left is num && right is String) {
+          return left.truncate().toString() + right;
+        }
+        if (left is String && right is num) {
+          return left + right.truncate().toString();
         }
         throw RuntimeError(
             expr.operator, 'Operands must be two numbers or two strings.');
@@ -120,5 +135,18 @@ class Interpreter implements Visitor<Object?> {
   void checkNumberOperands(Token operator, Object? left, Object? right) {
     if (left is num && right is num) return;
     throw RuntimeError(operator, 'Operands must be numbers.');
+  }
+
+  @override
+  void visitExpressionStmt(Expression stmt) {
+    evaluate(stmt.expression);
+    return;
+  }
+
+  @override
+  void visitPrintStmt(Print stmt) {
+    Object? value = evaluate(stmt.expression);
+    print(stringify(value));
+    return;
   }
 }

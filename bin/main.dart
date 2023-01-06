@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:darx/expr.dart';
 import 'package:darx/interpreter.dart';
 import 'package:darx/parser.dart';
 import 'package:darx/runtime_error.dart';
 import 'package:darx/scanner.dart';
+import 'package:darx/stmt.dart';
 import 'package:darx/token.dart';
 
 void main(List<String> args) {
@@ -51,10 +51,10 @@ class Runner {
     Scanner scanner = Scanner(source);
     List<Token> tokens = scanner.scanTokens();
     Parser parser = Parser(tokens);
-    Expr? expression = parser.parse();
+    List<Stmt> statements = parser.parse();
 
     if (hadError) exit(65);
-    interpreter.interpret(expression!);
+    interpreter.interpret(statements);
     if (hadRuntimeError) exit(70);
 
     // For now, just print the tokens.

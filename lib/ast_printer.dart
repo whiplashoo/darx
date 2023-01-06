@@ -1,6 +1,6 @@
 import 'expr.dart';
 
-class AstPrinter implements Visitor<String> {
+class AstPrinter implements ExprVisitor<String> {
   String print(Expr expr) {
     return expr.accept(this);
   }

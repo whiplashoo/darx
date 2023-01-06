@@ -5,7 +5,7 @@
 ### Usage
 
 ```bash
-dart bin/main.dart
+dart bin/main.dart or drun
 ```
 
 ### Tests
