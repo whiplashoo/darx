@@ -8,6 +8,7 @@ import 'token.dart';
 class Parser {
   final List<Token> tokens;
   int current = 0;
+  int loopDepth = 0;
 
   Parser(this.tokens);
 
@@ -35,11 +36,20 @@ class Parser {
 
   Stmt statement() {
     if (match([TokenType.FOR])) return forStatement();
+    if (match([TokenType.BREAK])) return breakStatement();
     if (match([TokenType.IF])) return ifStatement();
     if (match([TokenType.WHILE])) return whileStatement();
     if (match([TokenType.PRINT])) return printStatement();
     if (match([TokenType.LEFT_BRACE])) return Block(block());
     return expressionStatement();
+  }
+
+  Stmt breakStatement() {
+    if (loopDepth == 0) {
+      throw RuntimeError(previous(), 'Cannot use \'break\' outside of a loop.');
+    }
+    consume(TokenType.SEMICOLON, 'Expect \';\' after break.');
+    return Break(previous());
   }
 
   Stmt forStatement() {
@@ -64,15 +74,20 @@ class Parser {
     }
     consume(TokenType.RIGHT_PAREN, 'Expect \')\' after for clauses.');
 
-    Stmt body = statement();
-    if (increment != null) {
-      body = Block([body, Expression(increment)]);
-    }
-    condition ??= Literal(true);
-    body = While(condition, body);
-    body = Block([initializer, body]);
+    try {
+      loopDepth++;
+      Stmt body = statement();
+      if (increment != null) {
+        body = Block([body, Expression(increment)]);
+      }
+      condition ??= Literal(true);
+      body = While(condition, body);
+      body = Block([initializer, body]);
 
-    return body;
+      return body;
+    } finally {
+      loopDepth--;
+    }
   }
 
   Stmt ifStatement() {
@@ -91,8 +106,13 @@ class Parser {
     consume(TokenType.LEFT_PAREN, 'Expect \'(\' after \'while\'.');
     Expr condition = expression();
     consume(TokenType.RIGHT_PAREN, 'Expect \')\' after while condition.');
-    Stmt body = statement();
-    return While(condition, body);
+    try {
+      loopDepth++;
+      Stmt body = statement();
+      return While(condition, body);
+    } finally {
+      loopDepth--;
+    }
   }
 
   Stmt printStatement() {

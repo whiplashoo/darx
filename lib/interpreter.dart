@@ -216,9 +216,23 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   void visitWhileStmt(While stmt) {
-    while (isTruthy(evaluate(stmt.condition))) {
-      execute(stmt.body);
+    try {
+      while (isTruthy(evaluate(stmt.condition))) {
+        execute(stmt.body);
+      }
+    } on BreakException catch (e) {
+      print(e.message);
     }
     return;
   }
+
+  @override
+  void visitBreakStmt(Break stmt) {
+    throw BreakException(stmt.keyword, "");
+  }
 }
+
+class BreakException extends RuntimeError {
+  BreakException(super.token, super.message);
+}
+// var i = 0; while (i < 10) { i = i +1; print i; if (i == 5) { break; } }

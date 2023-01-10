@@ -10,6 +10,7 @@ abstract class StmtVisitor {
   void visitVarStmt(Var stmt);
   void visitPrintStmt(Print stmt);
   void visitWhileStmt(While stmt);
+  void visitBreakStmt(Break stmt);
 }
 class Block extends Stmt {
     Block(this.statements);
@@ -62,4 +63,12 @@ class While extends Stmt {
 
   final Expr condition;
   final Stmt body;
+  }
+class Break extends Stmt {
+    Break(this.keyword);
+
+  @override
+  void accept(StmtVisitor visitor) => visitor.visitBreakStmt(this);
+
+  final Token keyword;
   }

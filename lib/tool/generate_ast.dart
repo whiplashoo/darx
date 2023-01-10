@@ -24,6 +24,7 @@ void main(List<String> args) {
     "Var           : Token name, Expr? initializer",
     "Print         : Expr expression",
     "While         : Expr condition, Stmt body",
+    "Break         : Token keyword",
   ]);
 }
 
