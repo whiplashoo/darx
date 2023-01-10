@@ -6,8 +6,10 @@ abstract class Stmt {
 abstract class StmtVisitor {
   void visitBlockStmt(Block stmt);
   void visitExpressionStmt(Expression stmt);
+  void visitIfStmt(If stmt);
   void visitVarStmt(Var stmt);
   void visitPrintStmt(Print stmt);
+  void visitWhileStmt(While stmt);
 }
 class Block extends Stmt {
     Block(this.statements);
@@ -25,6 +27,16 @@ class Expression extends Stmt {
 
   final Expr expression;
   }
+class If extends Stmt {
+    If(this.condition, this.thenBranch, this.elseBranch);
+
+  @override
+  void accept(StmtVisitor visitor) => visitor.visitIfStmt(this);
+
+  final Expr condition;
+  final Stmt thenBranch;
+  final Stmt? elseBranch;
+  }
 class Var extends Stmt {
     Var(this.name, this.initializer);
 
@@ -41,4 +53,13 @@ class Print extends Stmt {
   void accept(StmtVisitor visitor) => visitor.visitPrintStmt(this);
 
   final Expr expression;
+  }
+class While extends Stmt {
+    While(this.condition, this.body);
+
+  @override
+  void accept(StmtVisitor visitor) => visitor.visitWhileStmt(this);
+
+  final Expr condition;
+  final Stmt body;
   }

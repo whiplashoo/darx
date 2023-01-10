@@ -34,9 +34,65 @@ class Parser {
   }
 
   Stmt statement() {
+    if (match([TokenType.FOR])) return forStatement();
+    if (match([TokenType.IF])) return ifStatement();
+    if (match([TokenType.WHILE])) return whileStatement();
     if (match([TokenType.PRINT])) return printStatement();
     if (match([TokenType.LEFT_BRACE])) return Block(block());
     return expressionStatement();
+  }
+
+  Stmt forStatement() {
+    consume(TokenType.LEFT_PAREN, 'Expect \'(\' after \'for\'.');
+    Stmt initializer;
+    if (match([TokenType.SEMICOLON])) {
+      initializer = Expression(Literal(null));
+    } else if (match([TokenType.VAR])) {
+      initializer = varDeclaration();
+    } else {
+      initializer = expressionStatement();
+    }
+    Expr? condition;
+    if (!check(TokenType.SEMICOLON)) {
+      condition = expression();
+    }
+    consume(TokenType.SEMICOLON, 'Expect \';\' after loop condition.');
+
+    Expr? increment;
+    if (!check(TokenType.RIGHT_PAREN)) {
+      increment = expression();
+    }
+    consume(TokenType.RIGHT_PAREN, 'Expect \')\' after for clauses.');
+
+    Stmt body = statement();
+    if (increment != null) {
+      body = Block([body, Expression(increment)]);
+    }
+    condition ??= Literal(true);
+    body = While(condition, body);
+    body = Block([initializer, body]);
+
+    return body;
+  }
+
+  Stmt ifStatement() {
+    consume(TokenType.LEFT_PAREN, 'Expect \'(\' after \'if\'.');
+    Expr condition = expression();
+    consume(TokenType.RIGHT_PAREN, 'Expect \')\' after if condition.');
+    Stmt thenBranch = statement();
+    Stmt? elseBranch;
+    if (match([TokenType.ELSE])) {
+      elseBranch = statement();
+    }
+    return If(condition, thenBranch, elseBranch);
+  }
+
+  Stmt whileStatement() {
+    consume(TokenType.LEFT_PAREN, 'Expect \'(\' after \'while\'.');
+    Expr condition = expression();
+    consume(TokenType.RIGHT_PAREN, 'Expect \')\' after while condition.');
+    Stmt body = statement();
+    return While(condition, body);
   }
 
   Stmt printStatement() {
@@ -71,7 +127,7 @@ class Parser {
   }
 
   Expr assignment() {
-    Expr expr = equality();
+    Expr expr = or();
     if (match([TokenType.EQUAL])) {
       Token equals = previous();
       Expr value = assignment();
@@ -80,6 +136,26 @@ class Parser {
         return Assign(name, value);
       }
       error(equals, 'Invalid assignment target.');
+    }
+    return expr;
+  }
+
+  Expr or() {
+    Expr expr = and();
+    while (match([TokenType.OR])) {
+      Token operator = previous();
+      Expr right = and();
+      expr = Logical(expr, operator, right);
+    }
+    return expr;
+  }
+
+  Expr and() {
+    Expr expr = equality();
+    while (match([TokenType.AND])) {
+      Token operator = previous();
+      Expr right = equality();
+      expr = Logical(expr, operator, right);
     }
     return expr;
   }

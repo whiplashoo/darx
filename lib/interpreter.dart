@@ -154,8 +154,7 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   void visitExpressionStmt(Expression stmt) {
-    Object? result = evaluate(stmt.expression);
-    print(result);
+    evaluate(stmt.expression);
     return;
   }
 
@@ -191,6 +190,35 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
   @override
   void visitBlockStmt(Block stmt) {
     executeBlock(stmt.statements, Environment(environment));
+    return;
+  }
+
+  @override
+  void visitIfStmt(If stmt) {
+    if (isTruthy(evaluate(stmt.condition))) {
+      execute(stmt.thenBranch);
+    } else if (stmt.elseBranch != null) {
+      execute(stmt.elseBranch!);
+    }
+    return;
+  }
+
+  @override
+  Object? visitLogicalExpr(Logical expr) {
+    Object? left = evaluate(expr.left);
+    if (expr.operator.type == TokenType.OR) {
+      if (isTruthy(left)) return left;
+    } else {
+      if (!isTruthy(left)) return left;
+    }
+    return evaluate(expr.right);
+  }
+
+  @override
+  void visitWhileStmt(While stmt) {
+    while (isTruthy(evaluate(stmt.condition))) {
+      execute(stmt.body);
+    }
     return;
   }
 }
