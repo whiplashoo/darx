@@ -1,11 +1,14 @@
 import 'package:darx/runtime_error.dart';
 import 'package:darx/stmt.dart';
 
+import 'environment.dart';
 import 'expr.dart';
 import 'token.dart';
 import 'token_type.dart';
 
 class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
+  Environment environment = Environment(null);
+
   void interpret(List<Stmt> statements) {
     try {
       for (Stmt statement in statements) {
@@ -23,6 +26,18 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   void execute(Stmt stmt) {
     stmt.accept(this);
+  }
+
+  void executeBlock(List<Stmt> statements, Environment environment) {
+    Environment previous = this.environment;
+    try {
+      this.environment = environment;
+      for (Stmt statement in statements) {
+        execute(statement);
+      }
+    } finally {
+      this.environment = previous;
+    }
   }
 
   @override
@@ -139,7 +154,8 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   void visitExpressionStmt(Expression stmt) {
-    evaluate(stmt.expression);
+    Object? result = evaluate(stmt.expression);
+    print(result);
     return;
   }
 
@@ -152,12 +168,29 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   void visitVarStmt(Var stmt) {
-    // TODO: implement visitVarStmt
+    Object? value;
+    if (stmt.initializer != null) {
+      value = evaluate(stmt.initializer!);
+    }
+    environment.define(stmt.name.lexeme, value);
+    return;
   }
 
   @override
   Object? visitVariableExpr(Variable expr) {
-    // TODO: implement visitVariableExpr
-    throw UnimplementedError();
+    return environment.get(expr.name);
+  }
+
+  @override
+  Object? visitAssignExpr(Assign expr) {
+    Object? value = evaluate(expr.value);
+    environment.assign(expr.name, value);
+    return value;
+  }
+
+  @override
+  void visitBlockStmt(Block stmt) {
+    executeBlock(stmt.statements, Environment(environment));
+    return;
   }
 }

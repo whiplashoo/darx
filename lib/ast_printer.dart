@@ -45,4 +45,10 @@ class AstPrinter implements ExprVisitor<String> {
     // TODO: implement visitVariableExpr
     throw UnimplementedError();
   }
+
+  @override
+  String visitAssignExpr(Assign expr) {
+    // TODO: implement visitAssignExpr
+    throw UnimplementedError();
+  }
 }

@@ -56,11 +56,6 @@ class Runner {
     if (hadError) exit(65);
     interpreter.interpret(statements);
     if (hadRuntimeError) exit(70);
-
-    // For now, just print the tokens.
-    for (Token token in tokens) {
-      print(token);
-    }
   }
 
   void runtimeError(RuntimeError error) {

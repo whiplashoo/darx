@@ -20,7 +20,7 @@ class Parser {
   }
 
   Expr expression() {
-    return equality();
+    return assignment();
   }
 
   Stmt declaration() {
@@ -35,6 +35,7 @@ class Parser {
 
   Stmt statement() {
     if (match([TokenType.PRINT])) return printStatement();
+    if (match([TokenType.LEFT_BRACE])) return Block(block());
     return expressionStatement();
   }
 
@@ -58,6 +59,29 @@ class Parser {
     Expr expr = expression();
     consume(TokenType.SEMICOLON, 'Expect \';\' after expression.');
     return Expression(expr);
+  }
+
+  List<Stmt> block() {
+    List<Stmt> statements = [];
+    while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+      statements.add(declaration());
+    }
+    consume(TokenType.RIGHT_BRACE, 'Expect \'}\' after block.');
+    return statements;
+  }
+
+  Expr assignment() {
+    Expr expr = equality();
+    if (match([TokenType.EQUAL])) {
+      Token equals = previous();
+      Expr value = assignment();
+      if (expr is Variable) {
+        Token name = expr.name;
+        return Assign(name, value);
+      }
+      error(equals, 'Invalid assignment target.');
+    }
+    return expr;
   }
 
   Expr equality() {

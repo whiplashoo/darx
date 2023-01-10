@@ -8,6 +8,7 @@ void main(List<String> args) {
   String outputDir = args[0];
 
   defineAst(outputDir, "Expr", [
+    "Assign   : Token name, Expr value",
     "Binary   : Expr left, Token operator, Expr right",
     "Grouping : Expr expression",
     "Literal  : Object? value",
@@ -16,6 +17,7 @@ void main(List<String> args) {
   ]);
 
   defineAst(outputDir, "Stmt", [
+    "Block         : List<Stmt> statements",
     "Expression    : Expr expression",
     "Var           : Token name, Expr? initializer",
     "Print         : Expr expression",
