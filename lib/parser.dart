@@ -26,6 +26,7 @@ class Parser {
 
   Stmt declaration() {
     try {
+      if (match([TokenType.FUN])) return function('function');
       if (match([TokenType.VAR])) return varDeclaration();
       return statement();
     } on RuntimeError {
@@ -137,6 +138,24 @@ class Parser {
     return Expression(expr);
   }
 
+  Stmt function(String kind) {
+    Token name = consume(TokenType.IDENTIFIER, 'Expect $kind name.');
+    consume(TokenType.LEFT_PAREN, 'Expect \'(\' after $kind name.');
+    List<Token> parameters = [];
+    if (!check(TokenType.RIGHT_PAREN)) {
+      do {
+        if (parameters.length >= 255) {
+          error(peek(), 'Cannot have more than 255 parameters.');
+        }
+        parameters.add(consume(TokenType.IDENTIFIER, 'Expect parameter name.'));
+      } while (match([TokenType.COMMA]));
+    }
+    consume(TokenType.RIGHT_PAREN, 'Expect \')\' after parameters.');
+    consume(TokenType.LEFT_BRACE, 'Expect \'{\' before $kind body.');
+    List<Stmt> body = block();
+    return Func(name, parameters, body);
+  }
+
   List<Stmt> block() {
     List<Stmt> statements = [];
     while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
@@ -233,7 +252,34 @@ class Parser {
       Expr right = unary();
       return Unary(operator, right);
     }
-    return primary();
+    return call();
+  }
+
+  Expr finishCall(Expr callee) {
+    List<Expr> arguments = [];
+    if (!check(TokenType.RIGHT_PAREN)) {
+      do {
+        if (arguments.length >= 255) {
+          error(peek(), 'Cannot have more than 255 arguments.');
+        }
+        arguments.add(expression());
+      } while (match([TokenType.COMMA]));
+    }
+    Token paren =
+        consume(TokenType.RIGHT_PAREN, 'Expect \')\' after arguments.');
+    return Call(callee, paren, arguments);
+  }
+
+  Expr call() {
+    Expr expr = primary();
+    while (true) {
+      if (match([TokenType.LEFT_PAREN])) {
+        expr = finishCall(expr);
+      } else {
+        break;
+      }
+    }
+    return expr;
   }
 
   Expr primary() {

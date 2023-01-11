@@ -6,6 +6,7 @@ abstract class Stmt {
 abstract class StmtVisitor {
   void visitBlockStmt(Block stmt);
   void visitExpressionStmt(Expression stmt);
+  void visitFuncStmt(Func stmt);
   void visitIfStmt(If stmt);
   void visitVarStmt(Var stmt);
   void visitPrintStmt(Print stmt);
@@ -27,6 +28,16 @@ class Expression extends Stmt {
   void accept(StmtVisitor visitor) => visitor.visitExpressionStmt(this);
 
   final Expr expression;
+  }
+class Func extends Stmt {
+    Func(this.name, this.params, this.body);
+
+  @override
+  void accept(StmtVisitor visitor) => visitor.visitFuncStmt(this);
+
+  final Token name;
+  final List<Token> params;
+  final List<Stmt> body;
   }
 class If extends Stmt {
     If(this.condition, this.thenBranch, this.elseBranch);

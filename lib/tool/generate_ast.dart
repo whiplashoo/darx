@@ -10,6 +10,7 @@ void main(List<String> args) {
   defineAst(outputDir, "Expr", [
     "Assign   : Token name, Expr value",
     "Binary   : Expr left, Token operator, Expr right",
+    "Call     : Expr callee, Token paren, List<Expr> arguments",
     "Grouping : Expr expression",
     "Literal  : Object? value",
     "Logical  : Expr left, Token operator, Expr right",
@@ -20,6 +21,7 @@ void main(List<String> args) {
   defineAst(outputDir, "Stmt", [
     "Block         : List<Stmt> statements",
     "Expression    : Expr expression",
+    "Func      : Token name, List<Token> params, List<Stmt> body",
     "If            : Expr condition, Stmt thenBranch, Stmt? elseBranch",
     "Var           : Token name, Expr? initializer",
     "Print         : Expr expression",

@@ -1,13 +1,21 @@
 import 'package:darx/runtime_error.dart';
 import 'package:darx/stmt.dart';
 
+import 'callable.dart';
 import 'environment.dart';
 import 'expr.dart';
+import 'function.dart';
 import 'token.dart';
 import 'token_type.dart';
 
 class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
-  Environment environment = Environment(null);
+  final globals = Environment(null);
+  late Environment environment;
+
+  Interpreter() {
+    globals.define("clock", Clock());
+    environment = globals;
+  }
 
   void interpret(List<Stmt> statements) {
     try {
@@ -230,9 +238,49 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
   void visitBreakStmt(Break stmt) {
     throw BreakException(stmt.keyword, "");
   }
+
+  @override
+  Object? visitCallExpr(Call expr) {
+    Object? callee = evaluate(expr.callee);
+    List<Object?> arguments = [];
+    for (Expr argument in expr.arguments) {
+      arguments.add(evaluate(argument));
+    }
+    if (callee is! Callable) {
+      throw RuntimeError(expr.paren, 'Can only call functions and classes.');
+    }
+    Callable function = callee;
+    if (arguments.length != function.arity) {
+      throw RuntimeError(expr.paren,
+          'Expected ${function.arity} arguments but got ${arguments.length}.');
+    }
+    return function.call(this, arguments);
+  }
+
+  @override
+  void visitFuncStmt(Func stmt) {
+    DarxFunction function = DarxFunction(stmt);
+    environment.define(stmt.name.lexeme, function);
+    return;
+  }
 }
 
 class BreakException extends RuntimeError {
   BreakException(super.token, super.message);
 }
 // var i = 0; while (i < 10) { i = i +1; print i; if (i == 5) { break; } }
+
+class Clock implements Callable {
+  @override
+  int arity = 0;
+
+  @override
+  Object? call(Interpreter interpreter, List<Object?> arguments) {
+    return DateTime.now().millisecondsSinceEpoch / 1000;
+  }
+
+  @override
+  String toString() {
+    return '<native fn>';
+  }
+}
