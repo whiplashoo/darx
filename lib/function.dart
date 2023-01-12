@@ -1,3 +1,5 @@
+import 'package:darx/return.dart';
+
 import 'callable.dart';
 import 'environment.dart';
 import 'interpreter.dart';
@@ -19,8 +21,8 @@ class DarxFunction implements Callable {
     }
     try {
       interpreter.executeBlock(declaration.body, environment);
-    } catch (returnValue) {
-      return returnValue;
+    } on ReturnException catch (returnValue) {
+      return returnValue.value;
     }
     return null;
   }

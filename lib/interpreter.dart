@@ -1,3 +1,4 @@
+import 'package:darx/return.dart';
 import 'package:darx/runtime_error.dart';
 import 'package:darx/stmt.dart';
 
@@ -262,6 +263,13 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
     DarxFunction function = DarxFunction(stmt);
     environment.define(stmt.name.lexeme, function);
     return;
+  }
+
+  @override
+  void visitReturnStmt(Return stmt) {
+    Object? value;
+    if (stmt.value != null) value = evaluate(stmt.value!);
+    throw ReturnException(value);
   }
 }
 

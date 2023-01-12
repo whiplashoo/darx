@@ -41,6 +41,7 @@ class Parser {
     if (match([TokenType.IF])) return ifStatement();
     if (match([TokenType.WHILE])) return whileStatement();
     if (match([TokenType.PRINT])) return printStatement();
+    if (match([TokenType.RETURN])) return returnStatement();
     if (match([TokenType.LEFT_BRACE])) return Block(block());
     return expressionStatement();
   }
@@ -120,6 +121,16 @@ class Parser {
     Expr value = expression();
     consume(TokenType.SEMICOLON, 'Expect \';\' after value.');
     return Print(value);
+  }
+
+  Stmt returnStatement() {
+    Token keyword = previous();
+    Expr? returnExpr;
+    if (!check(TokenType.SEMICOLON)) {
+      returnExpr = expression();
+    }
+    consume(TokenType.SEMICOLON, 'Expect \';\' after return statement.');
+    return Return(keyword, returnExpr);
   }
 
   Stmt varDeclaration() {

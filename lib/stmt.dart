@@ -10,6 +10,7 @@ abstract class StmtVisitor {
   void visitIfStmt(If stmt);
   void visitVarStmt(Var stmt);
   void visitPrintStmt(Print stmt);
+  void visitReturnStmt(Return stmt);
   void visitWhileStmt(While stmt);
   void visitBreakStmt(Break stmt);
 }
@@ -65,6 +66,15 @@ class Print extends Stmt {
   void accept(StmtVisitor visitor) => visitor.visitPrintStmt(this);
 
   final Expr expression;
+  }
+class Return extends Stmt {
+    Return(this.keyword, this.value);
+
+  @override
+  void accept(StmtVisitor visitor) => visitor.visitReturnStmt(this);
+
+  final Token keyword;
+  final Expr? value;
   }
 class While extends Stmt {
     While(this.condition, this.body);
