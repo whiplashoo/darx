@@ -260,7 +260,7 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   void visitFuncStmt(Func stmt) {
-    DarxFunction function = DarxFunction(stmt);
+    DarxFunction function = DarxFunction(stmt, environment);
     environment.define(stmt.name.lexeme, function);
     return;
   }

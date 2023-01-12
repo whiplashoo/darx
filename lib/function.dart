@@ -7,15 +7,16 @@ import 'stmt.dart';
 
 class DarxFunction implements Callable {
   late Func declaration;
+  late Environment closure;
 
-  DarxFunction(this.declaration);
+  DarxFunction(this.declaration, this.closure);
 
   @override
   int get arity => declaration.params.length;
 
   @override
   Object? call(Interpreter interpreter, List<Object?> arguments) {
-    var environment = Environment(interpreter.globals);
+    var environment = Environment(closure);
     for (int i = 0; i < declaration.params.length; i++) {
       environment.define(declaration.params[i].lexeme, arguments[i]);
     }
