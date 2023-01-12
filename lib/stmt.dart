@@ -31,14 +31,13 @@ class Expression extends Stmt {
   final Expr expression;
   }
 class Func extends Stmt {
-    Func(this.name, this.params, this.body);
+    Func(this.name, this.function);
 
   @override
   void accept(StmtVisitor visitor) => visitor.visitFuncStmt(this);
 
   final Token name;
-  final List<Token> params;
-  final List<Stmt> body;
+  final FuncExpr function;
   }
 class If extends Stmt {
     If(this.condition, this.thenBranch, this.elseBranch);

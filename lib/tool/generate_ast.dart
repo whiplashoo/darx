@@ -15,13 +15,14 @@ void main(List<String> args) {
     "Literal  : Object? value",
     "Logical  : Expr left, Token operator, Expr right",
     "Variable : Token name",
+    "FuncExpr          : List<Token> params, List<Stmt> body",
     "Unary    : Token operator, Expr right"
   ]);
 
   defineAst(outputDir, "Stmt", [
     "Block         : List<Stmt> statements",
     "Expression    : Expr expression",
-    "Func      : Token name, List<Token> params, List<Stmt> body",
+    "Func          : Token name, FuncExpr function",
     "If            : Expr condition, Stmt thenBranch, Stmt? elseBranch",
     "Var           : Token name, Expr? initializer",
     "Print         : Expr expression",

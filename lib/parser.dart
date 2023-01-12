@@ -151,6 +151,10 @@ class Parser {
 
   Stmt function(String kind) {
     Token name = consume(TokenType.IDENTIFIER, 'Expect $kind name.');
+    return Func(name, functionBody(kind));
+  }
+
+  FuncExpr functionBody(String kind) {
     consume(TokenType.LEFT_PAREN, 'Expect \'(\' after $kind name.');
     List<Token> parameters = [];
     if (!check(TokenType.RIGHT_PAREN)) {
@@ -164,7 +168,7 @@ class Parser {
     consume(TokenType.RIGHT_PAREN, 'Expect \')\' after parameters.');
     consume(TokenType.LEFT_BRACE, 'Expect \'{\' before $kind body.');
     List<Stmt> body = block();
-    return Func(name, parameters, body);
+    return FuncExpr(parameters, body);
   }
 
   List<Stmt> block() {
@@ -297,6 +301,7 @@ class Parser {
     if (match([TokenType.FALSE])) return Literal(false);
     if (match([TokenType.TRUE])) return Literal(true);
     if (match([TokenType.NIL])) return Literal(null);
+    if (match([TokenType.FUN])) return functionBody('function');
 
     if (match([TokenType.NUMBER, TokenType.STRING])) {
       return Literal(previous().literal!);

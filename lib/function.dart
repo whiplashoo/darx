@@ -1,15 +1,16 @@
+import 'package:darx/expr.dart';
 import 'package:darx/return.dart';
 
 import 'callable.dart';
 import 'environment.dart';
 import 'interpreter.dart';
-import 'stmt.dart';
 
 class DarxFunction implements Callable {
-  late Func declaration;
+  String? name;
+  late FuncExpr declaration;
   late Environment closure;
 
-  DarxFunction(this.declaration, this.closure);
+  DarxFunction(this.name, this.declaration, this.closure);
 
   @override
   int get arity => declaration.params.length;
@@ -30,6 +31,6 @@ class DarxFunction implements Callable {
 
   @override
   String toString() {
-    return "<fn ${declaration.name.lexeme}>";
+    return name != null ? "<fn $name>" : "anonymous function";
   }
 }
