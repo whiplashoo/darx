@@ -208,6 +208,17 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
     declare(stmt.name);
     define(stmt.name);
   }
+
+  @override
+  void visitGetExpr(Get expr) {
+    resolveExpr(expr.object);
+  }
+
+  @override
+  void visitSetExpr(Set expr) {
+    resolveExpr(expr.value);
+    resolveExpr(expr.object);
+  }
 }
 
 class Stack<T> {

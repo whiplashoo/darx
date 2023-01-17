@@ -7,6 +7,7 @@ import 'class.dart';
 import 'environment.dart';
 import 'expr.dart';
 import 'function.dart';
+import 'instance.dart';
 import 'token.dart';
 import 'token_type.dart';
 
@@ -298,6 +299,26 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
     DarxClass klass = DarxClass(stmt.name.lexeme);
     environment.assign(stmt.name, klass);
     return;
+  }
+
+  @override
+  Object? visitGetExpr(Get expr) {
+    Object? object = evaluate(expr.object);
+    if (object is DarxInstance) {
+      return object.get(expr.name);
+    }
+    throw RuntimeError(expr.name, "Only instances have properties.");
+  }
+
+  @override
+  Object? visitSetExpr(Set expr) {
+    Object? object = evaluate(expr.object);
+    if (object is DarxInstance) {
+      Object? value = evaluate(expr.value);
+      object.set(expr.name, value);
+      return value;
+    }
+    throw RuntimeError(expr.name, "Only instances have fields.");
   }
 }
 
