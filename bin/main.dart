@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:darx/interpreter.dart';
 import 'package:darx/parser.dart';
+import 'package:darx/resolver.dart';
 import 'package:darx/runtime_error.dart';
 import 'package:darx/scanner.dart';
 import 'package:darx/stmt.dart';
@@ -53,6 +54,9 @@ class Runner {
     Parser parser = Parser(tokens);
     List<Stmt> statements = parser.parse();
 
+    if (hadError) exit(65);
+    Resolver resolver = Resolver(interpreter);
+    resolver.resolve(statements);
     if (hadError) exit(65);
     interpreter.interpret(statements);
     if (hadRuntimeError) exit(70);

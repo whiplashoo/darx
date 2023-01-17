@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:collection';
 
 import 'expr.dart';
@@ -6,9 +8,17 @@ import 'runtime_error.dart';
 import 'stmt.dart';
 import 'token.dart';
 
+enum FunctionType {
+  NONE,
+  FUNCTION,
+  INITIALIZER,
+  METHOD,
+}
+
 class Resolver implements ExprVisitor<Object?>, StmtVisitor {
   Interpreter interpreter;
   Stack<Map<String, bool>> scopes = Stack();
+  FunctionType currentFunction = FunctionType.NONE;
 
   Resolver(this.interpreter);
 
@@ -18,7 +28,9 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
     }
   }
 
-  void resolveFunction(Func function) {
+  void resolveFunction(Func function, FunctionType type) {
+    FunctionType enclosingFunction = currentFunction;
+    currentFunction = type;
     beginScope();
     for (Token param in function.params) {
       declare(param);
@@ -26,6 +38,7 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
     }
     resolve(function.body);
     endScope();
+    currentFunction = enclosingFunction;
   }
 
   void resolveStmt(Stmt stmt) {
@@ -113,7 +126,7 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
   void visitFuncStmt(Func stmt) {
     declare(stmt.name);
     define(stmt.name);
-    resolveFunction(stmt);
+    resolveFunction(stmt, FunctionType.FUNCTION);
     return;
   }
 
@@ -150,6 +163,9 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   void visitReturnStmt(Return stmt) {
+    if (currentFunction == FunctionType.NONE) {
+      throw RuntimeError(stmt.keyword, "Cannot return from top-level code.");
+    }
     if (stmt.value != null) {
       resolveExpr(stmt.value!);
     }
@@ -185,6 +201,12 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
   void visitWhileStmt(While stmt) {
     resolveExpr(stmt.condition);
     resolveStmt(stmt.body);
+  }
+
+  @override
+  void visitClassStmt(Class stmt) {
+    declare(stmt.name);
+    define(stmt.name);
   }
 }
 

@@ -3,6 +3,7 @@ import 'package:darx/runtime_error.dart';
 import 'package:darx/stmt.dart';
 
 import 'callable.dart';
+import 'class.dart';
 import 'environment.dart';
 import 'expr.dart';
 import 'function.dart';
@@ -12,6 +13,7 @@ import 'token_type.dart';
 class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
   final globals = Environment(null);
   late Environment environment;
+  final locals = <Expr, int>{};
 
   Interpreter() {
     globals.define("clock", Clock());
@@ -35,6 +37,10 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   void execute(Stmt stmt) {
     stmt.accept(this);
+  }
+
+  void resolve(Expr expr, int depth) {
+    locals[expr] = depth;
   }
 
   void executeBlock(List<Stmt> statements, Environment environment) {
@@ -186,13 +192,27 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   Object? visitVariableExpr(Variable expr) {
-    return environment.get(expr.name);
+    return lookUpVariable(expr.name, expr);
+  }
+
+  Object? lookUpVariable(Token name, Expr expr) {
+    int? distance = locals[expr];
+    if (distance != null) {
+      return environment.getAt(distance, name.lexeme);
+    } else {
+      return globals.get(name);
+    }
   }
 
   @override
   Object? visitAssignExpr(Assign expr) {
     Object? value = evaluate(expr.value);
-    environment.assign(expr.name, value);
+    int? distance = locals[expr];
+    if (distance != null) {
+      environment.assignAt(distance, expr.name, value);
+    } else {
+      globals.assign(expr.name, value);
+    }
     return value;
   }
 
@@ -270,6 +290,14 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
     Object? value;
     if (stmt.value != null) value = evaluate(stmt.value!);
     throw ReturnException(value);
+  }
+
+  @override
+  void visitClassStmt(Class stmt) {
+    environment.define(stmt.name.lexeme, null);
+    DarxClass klass = DarxClass(stmt.name.lexeme);
+    environment.assign(stmt.name, klass);
+    return;
   }
 }
 

@@ -20,6 +20,7 @@ void main(List<String> args) {
 
   defineAst(outputDir, "Stmt", [
     "Block         : List<Stmt> statements",
+    "Class         : Token name, List<Func>? methods",
     "Expression    : Expr expression",
     "Func      : Token name, List<Token> params, List<Stmt> body",
     "If            : Expr condition, Stmt thenBranch, Stmt? elseBranch",

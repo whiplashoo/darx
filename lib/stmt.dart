@@ -5,6 +5,7 @@ abstract class Stmt {
 }
 abstract class StmtVisitor {
   void visitBlockStmt(Block stmt);
+  void visitClassStmt(Class stmt);
   void visitExpressionStmt(Expression stmt);
   void visitFuncStmt(Func stmt);
   void visitIfStmt(If stmt);
@@ -21,6 +22,15 @@ class Block extends Stmt {
   void accept(StmtVisitor visitor) => visitor.visitBlockStmt(this);
 
   final List<Stmt> statements;
+  }
+class Class extends Stmt {
+    Class(this.name, this.methods);
+
+  @override
+  void accept(StmtVisitor visitor) => visitor.visitClassStmt(this);
+
+  final Token name;
+  final List<Func>? methods;
   }
 class Expression extends Stmt {
     Expression(this.expression);
