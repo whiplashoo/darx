@@ -23,11 +23,19 @@ class DarxClass implements Callable {
   }
 
   @override
-  int get arity => 0;
+  int get arity {
+    DarxFunction? initializer = findMethod('init');
+    if (initializer == null) return 0;
+    return initializer.arity;
+  }
 
   @override
   Object? call(Interpreter interpreter, List<Object?> arguments) {
     DarxInstance instance = DarxInstance(this);
+    DarxFunction? initializer = findMethod('init');
+    if (initializer != null) {
+      initializer.bind(instance).call(interpreter, arguments);
+    }
     return instance;
   }
 }

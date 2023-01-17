@@ -174,6 +174,10 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
       throw RuntimeError(stmt.keyword, "Cannot return from top-level code.");
     }
     if (stmt.value != null) {
+      if (currentFunction == FunctionType.INITIALIZER) {
+        throw RuntimeError(
+            stmt.keyword, "Cannot return a value from an initializer.");
+      }
       resolveExpr(stmt.value!);
     }
   }

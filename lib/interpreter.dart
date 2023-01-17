@@ -281,7 +281,7 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   void visitFuncStmt(Func stmt) {
-    DarxFunction function = DarxFunction(stmt, environment);
+    DarxFunction function = DarxFunction(stmt, environment, false);
     environment.define(stmt.name.lexeme, function);
     return;
   }
@@ -299,7 +299,8 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
     Map<String, DarxFunction> methods = {};
     if (stmt.methods != null) {
       for (Func method in stmt.methods!) {
-        DarxFunction function = DarxFunction(method, environment);
+        DarxFunction function =
+            DarxFunction(method, environment, method.name.lexeme == "init");
         methods[method.name.lexeme] = function;
       }
     }

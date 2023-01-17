@@ -9,8 +9,9 @@ import 'stmt.dart';
 class DarxFunction implements Callable {
   late Func declaration;
   late Environment closure;
+  bool isInitializer;
 
-  DarxFunction(this.declaration, this.closure);
+  DarxFunction(this.declaration, this.closure, this.isInitializer);
 
   @override
   int get arity => declaration.params.length;
@@ -24,15 +25,17 @@ class DarxFunction implements Callable {
     try {
       interpreter.executeBlock(declaration.body, environment);
     } on ReturnException catch (returnValue) {
+      if (isInitializer) return closure.getAt(0, 'this');
       return returnValue.value;
     }
+    if (isInitializer) return closure.getAt(0, 'this');
     return null;
   }
 
   DarxFunction bind(DarxInstance instance) {
     var environment = Environment(closure);
     environment.define('this', instance);
-    return DarxFunction(declaration, environment);
+    return DarxFunction(declaration, environment, isInitializer);
   }
 
   @override
