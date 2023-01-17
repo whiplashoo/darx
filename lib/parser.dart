@@ -320,6 +320,10 @@ class Parser {
       return Literal(previous().literal!);
     }
 
+    if (match([TokenType.THIS])) {
+      return This(previous());
+    }
+
     if (match([TokenType.IDENTIFIER])) {
       return Variable(previous());
     }

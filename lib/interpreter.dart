@@ -296,7 +296,14 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
   @override
   void visitClassStmt(Class stmt) {
     environment.define(stmt.name.lexeme, null);
-    DarxClass klass = DarxClass(stmt.name.lexeme);
+    Map<String, DarxFunction> methods = {};
+    if (stmt.methods != null) {
+      for (Func method in stmt.methods!) {
+        DarxFunction function = DarxFunction(method, environment);
+        methods[method.name.lexeme] = function;
+      }
+    }
+    DarxClass klass = DarxClass(stmt.name.lexeme, methods);
     environment.assign(stmt.name, klass);
     return;
   }
@@ -319,6 +326,11 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
       return value;
     }
     throw RuntimeError(expr.name, "Only instances have fields.");
+  }
+
+  @override
+  Object? visitThisExpr(This expr) {
+    return lookUpVariable(expr.keyword, expr);
   }
 }
 

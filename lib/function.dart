@@ -2,6 +2,7 @@ import 'package:darx/return.dart';
 
 import 'callable.dart';
 import 'environment.dart';
+import 'instance.dart';
 import 'interpreter.dart';
 import 'stmt.dart';
 
@@ -26,6 +27,12 @@ class DarxFunction implements Callable {
       return returnValue.value;
     }
     return null;
+  }
+
+  DarxFunction bind(DarxInstance instance) {
+    var environment = Environment(closure);
+    environment.define('this', instance);
+    return DarxFunction(declaration, environment);
   }
 
   @override

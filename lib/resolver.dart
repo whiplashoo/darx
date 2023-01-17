@@ -15,10 +15,17 @@ enum FunctionType {
   METHOD,
 }
 
+enum ClassType {
+  NONE,
+  CLASS,
+  SUBCLASS,
+}
+
 class Resolver implements ExprVisitor<Object?>, StmtVisitor {
   Interpreter interpreter;
   Stack<Map<String, bool>> scopes = Stack();
   FunctionType currentFunction = FunctionType.NONE;
+  ClassType currentClass = ClassType.NONE;
 
   Resolver(this.interpreter);
 
@@ -205,8 +212,23 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   void visitClassStmt(Class stmt) {
+    ClassType enclosingClass = currentClass;
+    currentClass = ClassType.CLASS;
     declare(stmt.name);
     define(stmt.name);
+    beginScope();
+    scopes.peek()["this"] = true;
+    if (stmt.methods != null) {
+      for (Func method in stmt.methods!) {
+        FunctionType declaration = FunctionType.METHOD;
+        if (method.name.lexeme == "init") {
+          declaration = FunctionType.INITIALIZER;
+        }
+        resolveFunction(method, declaration);
+      }
+    }
+    endScope();
+    currentClass = enclosingClass;
   }
 
   @override
@@ -218,6 +240,14 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
   void visitSetExpr(Set expr) {
     resolveExpr(expr.value);
     resolveExpr(expr.object);
+  }
+
+  @override
+  void visitThisExpr(This expr) {
+    if (currentClass == ClassType.NONE) {
+      throw RuntimeError(expr.keyword, "Cannot use 'this' outside of a class.");
+    }
+    resolveLocal(expr, expr.keyword);
   }
 }
 

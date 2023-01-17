@@ -1,3 +1,5 @@
+import 'package:darx/function.dart';
+
 import 'class.dart';
 import 'runtime_error.dart';
 import 'token.dart';
@@ -12,6 +14,8 @@ class DarxInstance {
     if (fields.containsKey(name.lexeme)) {
       return fields[name.lexeme];
     }
+    DarxFunction? method = klass.findMethod(name.lexeme);
+    if (method != null) return method.bind(this);
 
     throw RuntimeError(name, 'Undefined property "${name.lexeme}".');
   }
