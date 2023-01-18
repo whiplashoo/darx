@@ -220,6 +220,20 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
     currentClass = ClassType.CLASS;
     declare(stmt.name);
     define(stmt.name);
+    if (stmt.superclass != null) {
+      currentClass = ClassType.SUBCLASS;
+      resolveExpr(stmt.superclass!);
+    }
+    if (stmt.superclass != null) {
+      beginScope();
+      scopes.peek()["super"] = true;
+    }
+
+    if (stmt.superclass != null &&
+        stmt.name.lexeme == stmt.superclass!.name.lexeme) {
+      throw RuntimeError(
+          stmt.superclass!.name, "A class cannot inherit from itself.");
+    }
     beginScope();
     scopes.peek()["this"] = true;
     if (stmt.methods != null) {
@@ -232,6 +246,7 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
       }
     }
     endScope();
+    if (stmt.superclass != null) endScope();
     currentClass = enclosingClass;
   }
 
@@ -252,6 +267,19 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
       throw RuntimeError(expr.keyword, "Cannot use 'this' outside of a class.");
     }
     resolveLocal(expr, expr.keyword);
+  }
+
+  @override
+  Object? visitSuperExpr(Super expr) {
+    if (currentClass == ClassType.NONE) {
+      throw RuntimeError(
+          expr.keyword, "Cannot use 'super' outside of a class.");
+    } else if (currentClass != ClassType.SUBCLASS) {
+      throw RuntimeError(
+          expr.keyword, "Cannot use 'super' in a class with no superclass.");
+    }
+    resolveLocal(expr, expr.keyword);
+    return null;
   }
 }
 

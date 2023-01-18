@@ -295,7 +295,19 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
 
   @override
   void visitClassStmt(Class stmt) {
+    Object? superclass;
+    if (stmt.superclass != null) {
+      superclass = evaluate(stmt.superclass!);
+      if (superclass is! DarxClass) {
+        throw RuntimeError(
+            stmt.superclass!.name, "Superclass must be a class.");
+      }
+    }
     environment.define(stmt.name.lexeme, null);
+    if (stmt.superclass != null) {
+      environment = Environment(environment);
+      environment.define("super", superclass);
+    }
     Map<String, DarxFunction> methods = {};
     if (stmt.methods != null) {
       for (Func method in stmt.methods!) {
@@ -304,7 +316,11 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
         methods[method.name.lexeme] = function;
       }
     }
-    DarxClass klass = DarxClass(stmt.name.lexeme, methods);
+    DarxClass klass = DarxClass(stmt.name.lexeme,
+        superclass != null ? superclass as DarxClass : null, methods);
+    if (superclass != null) {
+      environment = environment.enclosing!;
+    }
     environment.assign(stmt.name, klass);
     return;
   }
@@ -332,6 +348,20 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
   @override
   Object? visitThisExpr(This expr) {
     return lookUpVariable(expr.keyword, expr);
+  }
+
+  @override
+  Object? visitSuperExpr(Super expr) {
+    int? distance = locals[expr];
+    DarxClass superclass = environment.getAt(distance!, "super") as DarxClass;
+    DarxInstance object =
+        environment.getAt(distance - 1, "this") as DarxInstance;
+    DarxFunction? method = superclass.findMethod(expr.method.lexeme);
+    if (method == null) {
+      throw RuntimeError(
+          expr.method, "Undefined property '${expr.method.lexeme}'.");
+    }
+    return method.bind(object);
   }
 }
 

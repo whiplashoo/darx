@@ -11,6 +11,7 @@ abstract class ExprVisitor<T> {
   T visitLiteralExpr(Literal expr);
   T visitLogicalExpr(Logical expr);
   T visitSetExpr(Set expr);
+  T visitSuperExpr(Super expr);
   T visitThisExpr(This expr);
   T visitVariableExpr(Variable expr);
   T visitUnaryExpr(Unary expr);
@@ -88,6 +89,15 @@ class Set extends Expr {
   final Expr object;
   final Token name;
   final Expr value;
+  }
+class Super extends Expr {
+    Super(this.keyword, this.method);
+
+  @override
+  T accept<T>(ExprVisitor<T> visitor) => visitor.visitSuperExpr(this);
+
+  final Token keyword;
+  final Token method;
   }
 class This extends Expr {
     This(this.keyword);

@@ -38,13 +38,18 @@ class Parser {
 
   Stmt classDeclaration() {
     Token name = consume(TokenType.IDENTIFIER, 'Expect class name.');
+    Variable? superclass;
+    if (match([TokenType.LESS])) {
+      consume(TokenType.IDENTIFIER, 'Expect superclass name.');
+      superclass = Variable(previous());
+    }
     consume(TokenType.LEFT_BRACE, 'Expect \'{\' before class body.');
-    List<Stmt> methods = [];
+    List<Func> methods = [];
     while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
       methods.add(function('method'));
     }
     consume(TokenType.RIGHT_BRACE, 'Expect \'}\' after class body.');
-    return Class(name, null);
+    return Class(name, superclass, methods);
   }
 
   Stmt statement() {
@@ -161,7 +166,7 @@ class Parser {
     return Expression(expr);
   }
 
-  Stmt function(String kind) {
+  Func function(String kind) {
     Token name = consume(TokenType.IDENTIFIER, 'Expect $kind name.');
     consume(TokenType.LEFT_PAREN, 'Expect \'(\' after $kind name.');
     List<Token> parameters = [];
@@ -318,6 +323,14 @@ class Parser {
 
     if (match([TokenType.NUMBER, TokenType.STRING])) {
       return Literal(previous().literal!);
+    }
+
+    if (match([TokenType.SUPER])) {
+      Token keyword = previous();
+      consume(TokenType.DOT, "Expect '.' after 'super'.");
+      Token method = consume(
+          TokenType.IDENTIFIER, "Expect superclass method name after '.'.");
+      return Super(keyword, method);
     }
 
     if (match([TokenType.THIS])) {

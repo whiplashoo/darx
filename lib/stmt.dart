@@ -24,12 +24,13 @@ class Block extends Stmt {
   final List<Stmt> statements;
   }
 class Class extends Stmt {
-    Class(this.name, this.methods);
+    Class(this.name, this.superclass, this.methods);
 
   @override
   void accept(StmtVisitor visitor) => visitor.visitClassStmt(this);
 
   final Token name;
+  final Variable? superclass;
   final List<Func>? methods;
   }
 class Expression extends Stmt {

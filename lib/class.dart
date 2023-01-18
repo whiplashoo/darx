@@ -5,10 +5,11 @@ import 'function.dart';
 import 'instance.dart';
 
 class DarxClass implements Callable {
+  final DarxClass? superclass;
   final String name;
   final Map<String, DarxFunction> methods;
 
-  DarxClass(this.name, this.methods);
+  DarxClass(this.name, this.superclass, this.methods);
 
   @override
   String toString() {
@@ -18,6 +19,9 @@ class DarxClass implements Callable {
   DarxFunction? findMethod(String name) {
     if (methods.containsKey(name)) {
       return methods[name];
+    }
+    if (superclass != null) {
+      return superclass!.findMethod(name);
     }
     return null;
   }

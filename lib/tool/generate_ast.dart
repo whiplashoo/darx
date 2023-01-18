@@ -16,6 +16,7 @@ void main(List<String> args) {
     "Literal  : Object? value",
     "Logical  : Expr left, Token operator, Expr right",
     "Set      : Expr object, Token name, Expr value",
+    "Super    : Token keyword, Token method",
     "This     : Token keyword",
     "Variable : Token name",
     "Unary    : Token operator, Expr right"
@@ -23,7 +24,7 @@ void main(List<String> args) {
 
   defineAst(outputDir, "Stmt", [
     "Block         : List<Stmt> statements",
-    "Class         : Token name, List<Func>? methods",
+    "Class      : Token name, Variable? superclass, List<Func>? methods",
     "Expression    : Expr expression",
     "Func      : Token name, List<Token> params, List<Stmt> body",
     "If            : Expr condition, Stmt thenBranch, Stmt? elseBranch",
