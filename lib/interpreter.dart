@@ -338,7 +338,11 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
   Object? visitGetExpr(Get expr) {
     Object? object = evaluate(expr.object);
     if (object is DarxInstance) {
-      return object.get(expr.name);
+      Object? result = object.get(expr.name);
+      if (result is DarxFunction && result.isGetter) {
+        return result.bind(object).call(this, []);
+      }
+      return result;
     }
     throw RuntimeError(expr.name, "Only instances have properties.");
   }

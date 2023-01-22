@@ -173,17 +173,21 @@ class Parser {
 
   Func function(String kind) {
     Token name = consume(TokenType.IDENTIFIER, 'Expect $kind name.');
-    consume(TokenType.LEFT_PAREN, 'Expect \'(\' after $kind name.');
-    List<Token> parameters = [];
-    if (!check(TokenType.RIGHT_PAREN)) {
-      do {
-        if (parameters.length >= 255) {
-          error(peek(), 'Cannot have more than 255 parameters.');
-        }
-        parameters.add(consume(TokenType.IDENTIFIER, 'Expect parameter name.'));
-      } while (match([TokenType.COMMA]));
+    List<Token>? parameters;
+    if (kind != 'method' || check(TokenType.LEFT_PAREN)) {
+      parameters = [];
+      consume(TokenType.LEFT_PAREN, 'Expect \'(\' after $kind name.');
+      if (!check(TokenType.RIGHT_PAREN)) {
+        do {
+          if (parameters.length >= 255) {
+            error(peek(), 'Cannot have more than 255 parameters.');
+          }
+          parameters
+              .add(consume(TokenType.IDENTIFIER, 'Expect parameter name.'));
+        } while (match([TokenType.COMMA]));
+      }
+      consume(TokenType.RIGHT_PAREN, 'Expect \')\' after parameters.');
     }
-    consume(TokenType.RIGHT_PAREN, 'Expect \')\' after parameters.');
     consume(TokenType.LEFT_BRACE, 'Expect \'{\' before $kind body.');
     List<Stmt> body = block();
     return Func(name, parameters, body);

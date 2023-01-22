@@ -34,9 +34,11 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
     FunctionType enclosingFunction = currentFunction;
     currentFunction = type;
     beginScope();
-    for (Token param in function.params) {
-      declare(param);
-      define(param);
+    if (function.params != null) {
+      for (Token param in function.params!) {
+        declare(param);
+        define(param);
+      }
     }
     resolve(function.body);
     endScope();

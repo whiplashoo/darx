@@ -26,7 +26,7 @@ void main(List<String> args) {
     "Block         : List<Stmt> statements",
     "Class      : Token name, Variable? superclass, List<Func>? methods, List<Func>? staticMethods",
     "Expression    : Expr expression",
-    "Func      : Token name, List<Token> params, List<Stmt> body",
+    "Func      : Token name, List<Token>? params, List<Stmt> body",
     "If            : Expr condition, Stmt thenBranch, Stmt? elseBranch",
     "Var           : Token name, Expr? initializer",
     "Print         : Expr expression",

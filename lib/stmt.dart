@@ -49,7 +49,7 @@ class Func extends Stmt {
   void accept(StmtVisitor visitor) => visitor.visitFuncStmt(this);
 
   final Token name;
-  final List<Token> params;
+  final List<Token>? params;
   final List<Stmt> body;
   }
 class If extends Stmt {

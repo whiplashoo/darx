@@ -14,13 +14,17 @@ class DarxFunction implements Callable {
   DarxFunction(this.declaration, this.closure, this.isInitializer);
 
   @override
-  int get arity => declaration.params.length;
+  int get arity => declaration.params != null ? declaration.params!.length : 0;
+
+  bool get isGetter => declaration.params == null;
 
   @override
   Object? call(Interpreter interpreter, List<Object?> arguments) {
     var environment = Environment(closure);
-    for (int i = 0; i < declaration.params.length; i++) {
-      environment.define(declaration.params[i].lexeme, arguments[i]);
+    if (declaration.params != null) {
+      for (int i = 0; i < declaration.params!.length; i++) {
+        environment.define(declaration.params![i].lexeme, arguments[i]);
+      }
     }
     try {
       interpreter.executeBlock(declaration.body, environment);
