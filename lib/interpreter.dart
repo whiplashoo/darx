@@ -340,7 +340,7 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
     if (object is DarxInstance) {
       Object? result = object.get(expr.name);
       if (result is DarxFunction && result.isGetter) {
-        return result.bind(object).call(this, []);
+        return result.call(this, []);
       }
       return result;
     }
