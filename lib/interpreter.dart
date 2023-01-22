@@ -316,7 +316,16 @@ class Interpreter implements ExprVisitor<Object?>, StmtVisitor {
         methods[method.name.lexeme] = function;
       }
     }
-    DarxClass klass = DarxClass(stmt.name.lexeme,
+    Map<String, DarxFunction> staticMethods = {};
+    if (stmt.staticMethods != null) {
+      for (Func staticMethod in stmt.staticMethods!) {
+        DarxFunction function = DarxFunction(staticMethod, environment, false);
+        staticMethods[staticMethod.name.lexeme] = function;
+      }
+    }
+    DarxClass metaclass = DarxClass(null, "${stmt.name.lexeme} metaclass",
+        superclass != null ? superclass as DarxClass : null, staticMethods);
+    DarxClass klass = DarxClass(metaclass, stmt.name.lexeme,
         superclass != null ? superclass as DarxClass : null, methods);
     if (superclass != null) {
       environment = environment.enclosing!;

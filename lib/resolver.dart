@@ -8,12 +8,7 @@ import 'runtime_error.dart';
 import 'stmt.dart';
 import 'token.dart';
 
-enum FunctionType {
-  NONE,
-  FUNCTION,
-  INITIALIZER,
-  METHOD,
-}
+enum FunctionType { NONE, FUNCTION, INITIALIZER, METHOD, STATIC_METHOD }
 
 enum ClassType {
   NONE,
@@ -242,6 +237,14 @@ class Resolver implements ExprVisitor<Object?>, StmtVisitor {
         if (method.name.lexeme == "init") {
           declaration = FunctionType.INITIALIZER;
         }
+        resolveFunction(method, declaration);
+      }
+    }
+    endScope();
+    beginScope();
+    if (stmt.staticMethods != null) {
+      for (Func method in stmt.staticMethods!) {
+        FunctionType declaration = FunctionType.STATIC_METHOD;
         resolveFunction(method, declaration);
       }
     }

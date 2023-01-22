@@ -4,12 +4,15 @@ import 'callable.dart';
 import 'function.dart';
 import 'instance.dart';
 
-class DarxClass implements Callable {
+class DarxClass extends DarxInstance implements Callable {
   final DarxClass? superclass;
   final String name;
   final Map<String, DarxFunction> methods;
 
-  DarxClass(this.name, this.superclass, this.methods);
+  DarxClass? metaclass;
+
+  DarxClass(this.metaclass, this.name, this.superclass, this.methods)
+      : super(metaclass);
 
   @override
   String toString() {

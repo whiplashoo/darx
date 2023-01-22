@@ -45,11 +45,16 @@ class Parser {
     }
     consume(TokenType.LEFT_BRACE, 'Expect \'{\' before class body.');
     List<Func> methods = [];
+    List<Func> staticMethods = [];
     while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-      methods.add(function('method'));
+      if (match([TokenType.CLASS])) {
+        staticMethods.add(function('method'));
+      } else {
+        methods.add(function('method'));
+      }
     }
     consume(TokenType.RIGHT_BRACE, 'Expect \'}\' after class body.');
-    return Class(name, superclass, methods);
+    return Class(name, superclass, methods, staticMethods);
   }
 
   Stmt statement() {

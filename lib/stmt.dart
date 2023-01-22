@@ -24,7 +24,7 @@ class Block extends Stmt {
   final List<Stmt> statements;
   }
 class Class extends Stmt {
-    Class(this.name, this.superclass, this.methods);
+    Class(this.name, this.superclass, this.methods, this.staticMethods);
 
   @override
   void accept(StmtVisitor visitor) => visitor.visitClassStmt(this);
@@ -32,6 +32,7 @@ class Class extends Stmt {
   final Token name;
   final Variable? superclass;
   final List<Func>? methods;
+  final List<Func>? staticMethods;
   }
 class Expression extends Stmt {
     Expression(this.expression);

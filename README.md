@@ -18,4 +18,11 @@ dart test/darx_test.dart
 
 [MIT](LICENSE)
 
-    
+class Math {
+    class square(n) {
+        return n * n;
+    }
+}
+print Math.square(3);
+
+class Math { class square(n) { return n * n; } } print Math.square(3);
